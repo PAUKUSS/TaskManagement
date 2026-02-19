@@ -48,6 +48,51 @@ public class UsersController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
     }
 
+    // Basic CRUD (used by TaskManagerUI)
+    [HttpPost]
+    public async Task<ActionResult<User>> Create([FromBody] CreateUserRequest request)
+    {
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            UserName = request.UserName,
+            Email = request.Email,
+            PasswordHash = request.Password,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _db.Users.Add(user);
+        await _db.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<User>> Update(Guid id, [FromBody] UpdateUserRequest request)
+    {
+        var user = await _db.Users.FindAsync(id);
+        if (user == null) return NotFound();
+
+        user.UserName = request.UserName;
+        user.Email = request.Email;
+        if (!string.IsNullOrWhiteSpace(request.Password))
+            user.PasswordHash = request.Password;
+
+        await _db.SaveChangesAsync();
+        return Ok(user);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<ActionResult> Delete(Guid id)
+    {
+        var user = await _db.Users.FindAsync(id);
+        if (user == null) return NotFound();
+
+        _db.Users.Remove(user);
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
     [HttpPost("login")]
     public async Task<ActionResult<User>> Login([FromBody] LoginRequest request)
     {
@@ -63,6 +108,20 @@ public class UsersController : ControllerBase
         public string UserName { get; set; } = default!;
         public string Email { get; set; } = default!;
         public string Password { get; set; } = default!;
+    }
+
+    public class CreateUserRequest
+    {
+        public string UserName { get; set; } = default!;
+        public string Email { get; set; } = default!;
+        public string Password { get; set; } = default!;
+    }
+
+    public class UpdateUserRequest
+    {
+        public string UserName { get; set; } = default!;
+        public string Email { get; set; } = default!;
+        public string? Password { get; set; }
     }
 
     public class LoginRequest

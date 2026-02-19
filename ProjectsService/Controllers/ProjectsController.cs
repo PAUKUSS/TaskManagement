@@ -44,4 +44,36 @@ public class ProjectsController : ControllerBase
 
         return CreatedAtAction(nameof(GetById), new { id = project.Id }, project);
     }
+
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<Project>> Update(Guid id, [FromBody] UpdateProjectDto dto)
+    {
+        var project = await _db.Projects.FindAsync(id);
+        if (project is null) return NotFound();
+
+        project.Name = dto.Name;
+        project.Description = dto.Description;
+        project.OwnerId = dto.OwnerId;
+
+        await _db.SaveChangesAsync();
+        return Ok(project);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<ActionResult> Delete(Guid id)
+    {
+        var project = await _db.Projects.FindAsync(id);
+        if (project is null) return NotFound();
+
+        _db.Projects.Remove(project);
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    public class UpdateProjectDto
+    {
+        public string Name { get; set; } = default!;
+        public string? Description { get; set; }
+        public Guid OwnerId { get; set; }
+    }
 }

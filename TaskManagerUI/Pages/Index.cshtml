@@ -1,0 +1,107 @@
+﻿@page
+@using System.Text.Json
+@model TaskManagerUI.Pages.IndexModel
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+@{
+    var gatewayBaseUrl = Configuration["ApiGateway:BaseUrl"] ?? "http://localhost:5207/";
+}
+
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Task Manager UI</title>
+    <link rel="stylesheet" href="/site.css" />
+</head>
+<body>
+    <header class="topbar">
+        <div class="wrap">
+            <h1>Task Manager</h1>
+            <div class="muted">UI → API Gateway → 3 микросервиса</div>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <div class="grid">
+            <section class="card">
+                <h2>Users</h2>
+                <div class="row">
+                    <input id="uUserName" placeholder="UserName" />
+                    <input id="uEmail" placeholder="Email" />
+                    <input id="uPassword" placeholder="Password" type="password" />
+                    <button id="uCreate">Create</button>
+                </div>
+                <div class="row">
+                    <input id="uId" placeholder="User Id (for update/delete)" />
+                    <button id="uUpdate">Update</button>
+                    <button class="danger" id="uDelete">Delete</button>
+                    <button class="ghost" id="uReload">Reload</button>
+                </div>
+                <pre class="out" id="uOut"></pre>
+            </section>
+
+            <section class="card">
+                <h2>Projects</h2>
+                <div class="row">
+                    <input id="pName" placeholder="Name" />
+                    <input id="pDescription" placeholder="Description" />
+                    <select id="pOwner"></select>
+                    <button id="pCreate">Create</button>
+                </div>
+                <div class="row">
+                    <input id="pId" placeholder="Project Id (for update/delete)" />
+                    <button id="pUpdate">Update</button>
+                    <button class="danger" id="pDelete">Delete</button>
+                    <button class="ghost" id="pReload">Reload</button>
+                </div>
+                <pre class="out" id="pOut"></pre>
+            </section>
+
+            <section class="card span2">
+                <h2>Tasks</h2>
+                <div class="row">
+                    <input id="tTitle" placeholder="Title" />
+                    <input id="tDescription" placeholder="Description" />
+                    <select id="tProject"></select>
+                    <select id="tAssignee"></select>
+                    <input id="tDue" placeholder="DueDate (YYYY-MM-DD)" />
+                    <button id="tCreate">Create</button>
+                </div>
+                <div class="row">
+                    <input id="tId" placeholder="Task Id (for update/delete/status)" />
+                    <select id="tStatus">
+                        <option value="New">New</option>
+                        <option value="InProgress">InProgress</option>
+                        <option value="Done">Done</option>
+                    </select>
+                    <button id="tUpdate">Update</button>
+                    <button id="tUpdateStatus">Update Status</button>
+                    <button class="danger" id="tDelete">Delete</button>
+                    <button class="ghost" id="tReload">Reload</button>
+                </div>
+                <pre class="out" id="tOut"></pre>
+            </section>
+        </div>
+
+        <section class="card">
+            <h2>Диагностика</h2>
+            <div class="muted">Gateway BaseUrl: <code id="gw"></code></div>
+            <div class="row">
+                <button class="ghost" id="health">Проверить доступность gateway (GET /users/api/users)</button>
+            </div>
+            <pre class="out" id="diag"></pre>
+        </section>
+    </main>
+
+    <script>
+        window.__gatewayBaseUrl = @Html.Raw(JsonSerializer.Serialize(Model.GatewayBaseUrl));
+    </script>
+    <script src="/site.js"></script>
+
+
+    <script src="/site.js"></script>
+</body>
+</html>

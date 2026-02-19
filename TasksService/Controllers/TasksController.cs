@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using TasksService.Data;
 using TasksService.Dtos;
 using TasksService.Models;
-using TaskStatus = TasksService.Models.TaskStatus; 
+using TaskStatus = TasksService.Models.TaskStatus;
+
 namespace TasksService.Controllers;
 
 [ApiController]
@@ -39,12 +40,10 @@ public class TasksController : ControllerBase
     {
         var gateway = _httpClientFactory.CreateClient("Gateway");
 
-        // Проверяем, что пользователь существует
         var userResponse = await gateway.GetAsync($"/users/api/users/{dto.AssigneeId}");
         if (userResponse.StatusCode == HttpStatusCode.NotFound)
             return BadRequest("Assignee user not found");
 
-        // Проверяем, что проект существует
         var projectResponse = await gateway.GetAsync($"/projects/api/projects/{dto.ProjectId}");
         if (projectResponse.StatusCode == HttpStatusCode.NotFound)
             return BadRequest("Project not found");
@@ -64,6 +63,43 @@ public class TasksController : ControllerBase
         await _db.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetById), new { id = task.Id }, task);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<TaskItem>> Update(Guid id, [FromBody] UpdateTaskDto dto)
+    {
+        var task = await _db.Tasks.FindAsync(id);
+        if (task == null) return NotFound();
+
+        var gateway = _httpClientFactory.CreateClient("Gateway");
+
+        var userResponse = await gateway.GetAsync($"/users/api/users/{dto.AssigneeId}");
+        if (userResponse.StatusCode == HttpStatusCode.NotFound)
+            return BadRequest("Assignee user not found");
+
+        var projectResponse = await gateway.GetAsync($"/projects/api/projects/{dto.ProjectId}");
+        if (projectResponse.StatusCode == HttpStatusCode.NotFound)
+            return BadRequest("Project not found");
+
+        task.Title = dto.Title;
+        task.Description = dto.Description;
+        task.ProjectId = dto.ProjectId;
+        task.AssigneeId = dto.AssigneeId;
+        task.DueDate = dto.DueDate;
+
+        await _db.SaveChangesAsync();
+        return Ok(task);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<ActionResult> Delete(Guid id)
+    {
+        var task = await _db.Tasks.FindAsync(id);
+        if (task == null) return NotFound();
+
+        _db.Tasks.Remove(task);
+        await _db.SaveChangesAsync();
+        return NoContent();
     }
 
     [HttpPut("{id:guid}/status")]

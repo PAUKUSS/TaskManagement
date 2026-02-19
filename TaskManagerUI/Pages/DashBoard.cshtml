@@ -1,0 +1,31 @@
+﻿@page
+@model TaskManagerUI.Pages.DashboardModel
+
+<h1>Task Manager Dashboard</h1>
+
+<h2>Users</h2>
+<table border="1">
+    <tr><th>Name</th><th>Email</th><th>CreatedAt</th></tr>
+    @foreach (var u in Model.Users)
+    {
+        <tr><td>@u.UserName</td><td>@u.Email</td><td>@u.CreatedAt</td></tr>
+    }
+</table>
+
+<h2>Projects</h2>
+<table border="1">
+    <tr><th>Name</th><th>Description</th><th>OwnerId</th><th>CreatedAt</th></tr>
+    @foreach (var p in Model.Projects)
+    {
+        <tr><td>@p.Name</td><td>@p.Description</td><td>@p.OwnerId</td><td>@p.CreatedAt</td></tr>
+    }
+</table>
+
+<h2>Tasks</h2>
+<table border="1">
+    <tr><th>Title</th><th>Description</th><th>Status</th><th>ProjectId</th><th>AssigneeId</th><th>CreatedAt</th><th>DueDate</th></tr>
+    @foreach (var t in Model.Tasks)
+    {
+        <tr><td>@t.Title</td><td>@t.Description</td><td>@t.Status</td><td>@t.ProjectId</td><td>@t.AssigneeId</td><td>@t.CreatedAt</td><td>@t.DueDate</td></tr>
+    }
+</table>
